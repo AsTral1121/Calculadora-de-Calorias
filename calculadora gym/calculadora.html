@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Calorías</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+}
+
+.background {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    background-color: #000;
+}
+
+.calculator-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 400px;
+    perspective: 1000px;
+}
+
+.calculator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #333;
+    border-radius: 15px;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    transform-style: preserve-3d;
+    transform: rotateX(90deg);
+    transition: transform 1s ease, opacity 1s ease;
+}
+
+.cover {
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    background: #666;
+    border-radius: 15px 15px 0 0;
+    transform-origin: top;
+    transform: rotateX(90deg);
+    transition: transform 1s ease;
+    z-index: 1;
+}
+
+.calculator-content {
+    position: relative;
+    z-index: 2;
+    padding: 20px;
+}
+
+h1 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff;
+    font-size: 16px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+input {
+    background-color: #fff;
+    color: #333;
+}
+
+select {
+    background-color: #ffeb3b;
+    color: #333;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.result {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #fff;
+}
+
+.result p {
+    margin: 5px 0;
+}
+
+/* Botón para abrir la calculadora */
+.open-button {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.open-button:hover {
+    background-color: #45a049;
+}
+
+/* Estrellas de fondo */
+.background::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    opacity: 0.5;
+    z-index: -1;
+}
+
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="calculator-container">
+            <div class="calculator" id="calculator">
+                <div class="cover" id="cover"></div>
+                <div class="calculator-content">
+                    <h1>Calculadora de Calorías</h1>
+                    <div class="input-group">
+                        <label for="weight">Peso (kg):</label>
+                        <input type="number" id="weight" placeholder="Ingresa tu peso">
+                    </div>
+                    <div class="input-group">
+                        <label for="height">Estatura (cm):</label>
+                        <input type="number" id="height" placeholder="Ingresa tu estatura">
+                    </div>
+                    <div class="input-group">
+                        <label for="activity">Nivel de actividad:</label>
+                        <select id="activity">
+                            <option value="1.2">Sedentario (poco o ningún ejercicio)</option>
+                            <option value="1.375">Ligera actividad (ejercicio ligero 1-3 días/semana)</option>
+                            <option value="1.55">Actividad moderada (ejercicio moderado 3-5 días/semana)</option>
+                            <option value="1.725">Muy activo (ejercicio intenso 6-7 días/semana)</option>
+                            <option value="1.9">Extremadamente activo (ejercicio muy intenso o trabajo físico)</option>
+                        </select>
+                    </div>
+                    <button onclick="calculateCalories()">Calcular</button>
+                    <div class="result">
+                        <p id="calories"></p>
+                        <p id="deficit"></p>
+                    </div>
+                </div>
+            </div>
+            <button class="open-button" onclick="toggleCalculator()">Iniciar Calculadora</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function calculateCalories() {
+    const weight = document.getElementById('weight').value;
+    const height = document.getElementById('height').value;
+    const activity = document.getElementById('activity').value;
+
+    if (weight && height) {
+        // Calcular el metabolismo basal (BMR) utilizando la fórmula de Harris-Benedict
+        const BMR = 10 * weight + 6.25 * height - 5 * 25 + 5; // Asumiendo 25 años como ejemplo
+
+        // Calcular calorías de mantenimiento
+        const maintenanceCalories = BMR * activity;
+
+        // Calcular el déficit calórico sugerido (500 calorías menos por día)
+        const deficitCalories = maintenanceCalories - 500;
+
+        // Mostrar los resultados
+        document.getElementById('calories').innerText = `Calorías de mantenimiento: ${Math.round(maintenanceCalories)} kcal`;
+        document.getElementById('deficit').innerText = `Calorías para déficit: ${Math.round(deficitCalories)} kcal`;
+    } else {
+        alert('Por favor, ingresa tu peso y estatura.');
+    }
+}
+
+function toggleCalculator() {
+    const calculator = document.getElementById('calculator');
+    const cover = document.getElementById('cover');
+    const isOpened = calculator.style.transform === 'rotateX(0deg)';
+
+    if (isOpened) {
+        // Cerrar la calculadora
+        cover.style.transform = 'rotateX(90deg)';
+        setTimeout(() => {
+            calculator.style.transform = 'rotateX(90deg)';
+            calculator.style.opacity = '0';
+        }, 1000);
+    } else {
+        // Abrir la calculadora
+        calculator.style.opacity = '1';
+        calculator.style.transform = 'rotateX(0deg)';
+        cover.style.transform = 'rotateX(0deg)';
+    }
+}
+
+    </script>
+</body>
+</html>
